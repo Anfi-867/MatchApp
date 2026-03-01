@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Match Timer</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MolinelloApp">
+    
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/53/53283.png">
+
+    <style>
+        :root {
+            --green: #2e7d32;
+            --red: #d32f2f;
+            --dark: #121212;
+            --card: #ffffff;
+            --text: #1a1a1a;
+        }
+
+        body {
+            font-family: -apple-system, Helvetica, Arial, sans-serif;
+            background-color: var(--dark);
+            margin: 0;
+            padding: env(safe-area-inset-top) 15px 20px 15px;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden; /* Blocca lo scroll della pagina */
+            user-select: none; /* Impedisce di selezionare il testo per sbaglio */
+        }
+
+        .app-shell {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Timer Block */
+        .timer-display-box {
+            background: var(--card);
+            border-radius: 25px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        #timer {
+            font-size: 6rem;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+            margin: 0;
+            color: var(--text);
+        }
+
+        .presets {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-p {
+            flex: 1;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .btn-p.active {
+            background: var(--green);
+            color: white;
+            border-color: var(--green);
+        }
+
+        /* Score Block */
+        .match-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            flex-grow: 1;
+        }
+
+        .team-unit {
+            background: var(--card);
+            border-radius: 25px;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .t-name {
+            border: none;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: 90%;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 5px;
+        }
+
+        .score-big {
+            font-size: 6rem;
+            font-weight: 900;
+            margin: 10px 0;
+        }
+
+        .btn-add {
+            width: 100%;
+            height: 100px;
+            border-radius: 20px;
+            border: none;
+            background: var(--green);
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .btn-sub {
+            background: #eeeeee;
+            border: none;
+            width: 60px;
+            height: 40px;
+            border-radius: 10px;
+            margin-top: 10px;
+            color: #666;
+        }
+
+        /* Bottom Controls */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-action {
+            padding: 22px;
+            border-radius: 20px;
+            border: none;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-start { background: #333; }
+        .btn-wa { background: #25D366; }
+        .btn-reset { background: transparent; color: #777; font-size: 0.9rem; margin-top: 10px;}
+
+        .expired { color: var(--red) !important; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body>
+
+<div class="app-shell">
+    <div class="timer-display-box">
+        <div class="presets">
+            <button class="btn-p" onclick="st(15, this)">15m</button>
+            <button class="btn-p active" onclick="st(20, this)">20m</button>
+            <button class="btn-p" onclick="st(0, this)">...</button>
+        </div>
+        <div id="timer">20:00</div>
+        <button id="mainBtn" class="btn-action btn-start" style="width:100%" onclick="tk()">AVVIA</button>
+    </div>
+
+    <div class="match-card">
+        <div class="team-unit">
+            <input type="text" id="tn1" class="t-name" value="MOLINELLO">
+            <div id="s1" class="score-big">0</div>
+            <button class="btn-add" onclick="sc('s1',1)">+</button>
+            <button class="btn-sub" onclick="sc('s1',-1)">-</button>
+        </div>
+        <div class="team-unit">
+            <input type="text" id="tn2" class="t-name" value="SQUADRA 2">
+            <div id="s2" class="score-big">0</div>
+            <button class="btn-add" onclick="sc('s2',1)">+</button>
+            <button class="btn-sub" onclick="sc('s2',-1)">-</button>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-action btn-wa" onclick="wa()">CONDIVIDI RISULTATO</button>
+        <button class="btn-reset" onclick="rs()">NUOVA PARTITA (RESET)</button>
+    </div>
+</div>
+
+<script>
+    let t = 1200, r = false, iv = null;
+
+    function v(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
+
+    function up() {
+        let m = Math.floor(t/60), s = t%60;
+        let d = document.getElementById('timer');
+        d.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+        if(t <= 0) d.classList.add('expired'); else d.classList.remove('expired');
+    }
+
+    function st(m, b) {
+        if(r) return;
+        t = m > 0 ? m*60 : parseInt(prompt("Minuti?")*60);
+        up();
+        document.querySelectorAll('.btn-p').forEach(p => p.classList.remove('active'));
+        b.classList.add('active');
+    }
+
+    function tk() {
+        let b = document.getElementById('mainBtn');
+        v(100);
+        if(r) {
+            clearInterval(iv);
+            r = false;
+            b.innerText = "RIPRENDI";
+        } else {
+            if(t <= 0) return;
+            r = true;
+            b.innerText = "PAUSA";
+            iv = setInterval(() => {
+                t--;
+                up();
+                if(t <= 0) {
+                    clearInterval(iv);
+                    r = false;
+                    v([500,200,500,200,500]);
+                    alert("TEMPO SCADUTO!");
+                    b.innerText = "FINE";
+                }
+            }, 1000);
+        }
+    }
+
+    function sc(id, val) {
+        let e = document.getElementById(id), c = parseInt(e.innerText);
+        if(c+val >= 0) {
+            e.innerText = c+val;
+            v(val > 0 ? 150 : 50);
+        }
+    }
+
+    function rs() {
+        if(confirm("Vuoi azzerare?") && confirm("Sicuro al 100%?")) {
+            location.reload();
+        }
+    }
+
+    function wa() {
+        let n1 = document.getElementById('tn1').value, n2 = document.getElementById('tn2').value;
+        let s1 = document.getElementById('s1').innerText, s2 = document.getElementById('s2').innerText;
+        let m = `FINALE: ${n1} ${s1} - ${s2} ${n2}`;
+        window.open(`https://wa.me/?text=${encodeURI(m)}`);
+    }
+</script>
+</body>
+</html>
