@@ -196,7 +196,7 @@
     function sh() {
         let n1 = document.getElementById('t1').value, n2 = document.getElementById('t2').value;
         let s1 = document.getElementById('s1').innerText, s2 = document.getElementById('s2').innerText;
-        window.open(`https://wa.me/?text=${encodeURI('FINALE: '+n1+' '+s1+' - '+s2+' '+n2)}`);
+        window.open(`https://wa.me/?text=${encodeURI(+n1+' - '+n2+': '+s1+' - '+s2)}`);
     }
 
     document.addEventListener('visibilitychange', () => {
@@ -204,4 +204,5 @@
     });
 </script>
 </body>
+
 </html>
