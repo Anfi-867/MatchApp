@@ -3,34 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Molinello Match Center</title>
+    <title>Match Center - Molinello</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         :root { --green: #2e7d32; --red: #d32f2f; --dark: #1a1a1a; --light: #f4f4f9; }
         body { font-family: -apple-system, sans-serif; background: var(--dark); margin: 0; padding: 10px; display: flex; justify-content: center; height: 100vh; box-sizing: border-box; overflow: hidden; }
-        .app-card { background: var(--light); width: 100%; max-width: 400px; border-radius: 25px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .app-card { background: var(--light); width: 100%; max-width: 400px; border-radius: 25px; padding: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; }
         
-        .timer-section { background: #fff; border-radius: 20px; padding: 10px; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
-        #timer-display { font-size: 3.5rem; font-weight: 800; margin: 5px 0; }
-        .presets { display: flex; justify-content: center; gap: 5px; margin-bottom: 8px; }
-        .btn-p { padding: 8px 15px; border: 2px solid #ddd; border-radius: 10px; background: white; font-weight: bold; }
+        /* TIMER */
+        .timer-section { background: #fff; border-radius: 20px; padding: 10px; text-align: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); position: relative; }
+        #timer-display { font-size: 3.5rem; font-weight: 800; margin: 2px 0; }
+        .wakelock-status { position: absolute; top: 10px; right: 15px; font-size: 0.6rem; color: #ccc; display: flex; align-items: center; gap: 4px; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
+        .dot.active { background: #4CAF50; box-shadow: 0 0 5px #4CAF50; }
+
+        .presets { display: flex; justify-content: center; gap: 5px; margin-bottom: 5px; }
+        .btn-p { padding: 6px 12px; border: 2px solid #ddd; border-radius: 10px; background: white; font-weight: bold; font-size: 0.8rem; }
         .btn-p.active { background: var(--green); color: white; border-color: var(--green); }
         
         .action-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
-        .btn-main { width: 100%; padding: 14px; border-radius: 12px; border: none; font-size: 1rem; font-weight: bold; color: white; }
+        .btn-main { width: 100%; padding: 12px; border-radius: 12px; border: none; font-size: 0.9rem; font-weight: bold; color: white; }
         .btn-start { background: var(--dark); grid-column: span 2; }
-        .btn-share { background: #25D366; font-size: 0.85rem; }
-        .btn-reset { background: var(--red); font-size: 0.85rem; }
+        .btn-share { background: #25D366; }
+        .btn-reset { background: #666; }
 
-        .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; }
-        .team-col { background: white; padding: 15px 10px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; }
-        .team-input { width: 90%; border: none; text-align: center; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid #eee; margin-bottom: 5px; }
-        .score-num { font-size: 4rem; font-weight: 900; margin: 5px 0; line-height: 1; }
-        
-        .btn-round { width: 65px; height: 65px; border-radius: 50%; border: none; color: white; font-size: 2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        /* SCOREBOARD */
+        .scoreboard { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .team-col { background: white; padding: 10px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; border: 1px solid #eee; }
+        .team-input { width: 90%; border: none; text-align: center; font-weight: 900; text-transform: uppercase; border-bottom: 2px solid #eee; font-size: 0.85rem; padding: 4px; }
+        .score-num { font-size: 3.5rem; font-weight: 900; margin: 2px 0; line-height: 1; }
+        .btn-round { width: 60px; height: 60px; border-radius: 50%; border: none; color: white; font-size: 1.8rem; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-plus { background: var(--green); }
-        .btn-minus { background: #bbb; width: 45px; height: 45px; font-size: 1.5rem; margin-top: 10px; }
+        .btn-minus { background: #bbb; width: 40px; height: 40px; font-size: 1.1rem; margin-top: 5px; }
+
+        /* REGISTRO GOAL */
+        .goal-log { flex-grow: 1; background: #e8e8e8; border-radius: 15px; padding: 10px; overflow-y: auto; margin-top: 5px; border: 1px inset #ccc; }
+        .log-title { font-size: 0.65rem; color: #777; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px; }
+        .goal-entry { background: white; padding: 8px 12px; border-radius: 10px; margin-bottom: 5px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 5px solid var(--green); }
+        .goal-entry.t2 { border-left-color: var(--dark); }
+        .minute-tag { background: #eee; padding: 2px 6px; border-radius: 5px; font-weight: bold; font-size: 0.75rem; }
 
         .expired { color: var(--red); animation: blink 0.8s infinite; }
         @keyframes blink { 50% { opacity: 0.3; } }
@@ -40,16 +52,18 @@
 
 <div class="app-card">
     <div class="timer-section">
+        <div class="wakelock-status">
+            <div id="statusDot" class="dot"></div> <span id="statusText">SCHERMO LIBERO</span>
+        </div>
         <div class="presets">
-            <button class="btn-p" onclick="v(50);setT(15, this)">15m</button>
-            <button class="btn-p active" onclick="v(50);setT(20, this)">20m</button>
-            <button class="btn-p" onclick="v(50);setCustom(this)">...</button>
+            <button class="btn-p" onclick="v(40);setT(15, this)">15m</button>
+            <button class="btn-p active" onclick="v(40);setT(20, this)">20m</button>
+            <button class="btn-p" onclick="v(40);setCustom(this)">...</button>
         </div>
         <div id="timer-display">20:00</div>
-        
         <div class="action-bar">
             <button id="startBtn" class="btn-main btn-start" onclick="toggleT()">AVVIA PARTITA</button>
-            <button class="btn-main btn-share" onclick="v(50);sh()">WHATSAPP</button>
+            <button class="btn-main btn-share" onclick="sh()">WHATSAPP</button>
             <button class="btn-main btn-reset" onclick="rs()">AZZERA</button>
         </div>
     </div>
@@ -57,38 +71,53 @@
     <div class="scoreboard">
         <div class="team-col">
             <input type="text" id="t1" class="team-input" value="MOLINELLO">
-            <button class="btn-round btn-plus" onclick="sc('s1',1)">+</button>
+            <button class="btn-round btn-plus" onclick="sc('s1',1, 't1')">+</button>
             <div id="s1" class="score-num">0</div>
-            <button class="btn-round btn-minus" onclick="sc('s1',-1)">-</button>
+            <button class="btn-round btn-minus" onclick="sc('s1',-1, 't1')">-</button>
         </div>
         <div class="team-col">
             <input type="text" id="t2" class="team-input" value="SQUADRA 2">
-            <button class="btn-round btn-plus" onclick="sc('s2',1)">+</button>
+            <button class="btn-round btn-plus" onclick="sc('s2',1, 't2')">+</button>
             <div id="s2" class="score-num">0</div>
-            <button class="btn-round btn-minus" onclick="sc('s2',-1)">-</button>
+            <button class="btn-round btn-minus" onclick="sc('s2',-1, 't2')">-</button>
         </div>
+    </div>
+
+    <div class="goal-log" id="goalLog">
+        <div class="log-title">Cronologia Eventi</div>
     </div>
 </div>
 
-<audio id="whistleSound" preload="auto">
-    <source src="fischio.mp3" type="audio/mpeg">
-</audio>
+<audio id="whistleSound" preload="auto"><source src="fischio.mp3" type="audio/mpeg"></audio>
 
 <script>
-    let t = 1200, r = false, iv = null;
+    let t = 1200, initialT = 1200, r = false, iv = null, endTime = null;
+    let wakeLock = null;
     const whistle = document.getElementById('whistleSound');
 
     function v(ms) { if(navigator.vibrate) navigator.vibrate(ms); }
 
+    // GESTIONE SCHERMO ACCESO
+    async function requestWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                document.getElementById('statusDot').classList.add('active');
+                document.getElementById('statusText').innerText = "SCHERMO BLOCCATO";
+            } catch (err) { console.error(`${err.name}, ${err.message}`); }
+        }
+    }
+
     function up() {
-        let m = Math.floor(t/60), s = t%60;
+        let displayT = Math.max(0, t);
+        let m = Math.floor(displayT/60), s = displayT%60;
         let d = document.getElementById('timer-display');
         d.innerText = `${m}:${s < 10 ? '0'+s : s}`;
         if(t <= 0) d.classList.add('expired'); else d.classList.remove('expired');
     }
 
     function setT(m, b) {
-        if(r) return; t = m*60; up();
+        if(r) return; t = initialT = m*60; up();
         document.querySelectorAll('.btn-p').forEach(p => p.classList.remove('active'));
         b.classList.add('active');
     }
@@ -100,34 +129,68 @@
     }
 
     function toggleT() {
-        // "Sveglia" l'audio al primo tocco
-        whistle.play().then(() => { whistle.pause(); whistle.currentTime = 0; }).catch(() => {});
-        
+        whistle.play().then(() => { whistle.pause(); whistle.currentTime = 0; }).catch(()=>{});
         let b = document.getElementById('startBtn'); v(100);
-        if(r) { clearInterval(iv); r = false; b.innerText = "RIPRENDI"; }
-        else {
-            if(t <= 0) return; r = true; b.innerText = "PAUSA";
+        
+        if(r) { // PAUSA
+            clearInterval(iv); r = false; b.innerText = "RIPRENDI";
+            if(wakeLock) { wakeLock.release(); wakeLock = null; }
+            document.getElementById('statusDot').classList.remove('active');
+            document.getElementById('statusText').innerText = "SCHERMO LIBERO";
+        } else { // AVVIO
+            if(t <= 0) return;
+            r = true; b.innerText = "PAUSA";
+            requestWakeLock();
+            endTime = Date.now() + (t * 1000);
             iv = setInterval(() => { 
-                t--; up(); 
+                t = Math.round((endTime - Date.now()) / 1000);
+                up(); 
                 if(t <= 0) { 
-                    clearInterval(iv); r = false; 
-                    whistle.play();
-                    // VIBRAZIONE LUNGA STILE TELEFONATA (3 colpi da 1.5 secondi)
-                    v([1500, 300, 1500, 300, 1500]); 
-                    setTimeout(() => { alert("FISCHIO FINALE!"); b.innerText = "FINE"; }, 200);
+                    clearInterval(iv); r = false; whistle.play();
+                    v([1500, 300, 1500, 300, 1500]);
+                    document.getElementById('statusDot').classList.remove('active');
+                    setTimeout(() => { alert("FINE PARTITA!"); b.innerText = "FINE"; }, 200);
                 } 
             }, 1000);
         }
     }
 
-    function sc(id, val) {
+    function sc(id, val, teamInputId) {
         let e = document.getElementById(id), c = parseInt(e.innerText);
-        if(c+val >= 0) { e.innerText = c+val; v(val > 0 ? 150 : 60); }
+        if(c+val >= 0) { 
+            e.innerText = c+val; 
+            v(val > 0 ? 150 : 60); 
+            if(val > 0) logGoal(teamInputId);
+            else removeLastGoal(teamInputId);
+        }
+    }
+
+    function logGoal(teamInputId) {
+        let teamName = document.getElementById(teamInputId).value;
+        let elapsedSec = initialT - Math.max(0, t);
+        let minute = Math.floor(elapsedSec / 60) + 1;
+        let log = document.getElementById('goalLog');
+        let entry = document.createElement('div');
+        entry.className = `goal-entry ${teamInputId === 't2' ? 't2' : ''}`;
+        entry.dataset.team = teamInputId; // Serve per rimuovere in caso di errore
+        entry.innerHTML = `<span>⚽ <b>${teamName}</b></span> <span class="minute-tag">${minute}'</span>`;
+        log.prepend(entry);
+    }
+
+    function removeLastGoal(teamInputId) {
+        let log = document.getElementById('goalLog');
+        let entries = log.getElementsByClassName('goal-entry');
+        for (let i = 0; i < entries.length; i++) {
+            if (entries[i].dataset.team === teamInputId) {
+                log.removeChild(entries[i]);
+                break;
+            }
+        }
     }
 
     function rs() {
         v(200);
-        if(confirm("Vuoi azzerare?") && confirm("Sicuro?")) location.reload();
+        if(confirm("Azzerare tutto?") && confirm("Sicuro?")) location.reload();
     }
 
     function sh() {
@@ -135,6 +198,10 @@
         let s1 = document.getElementById('s1').innerText, s2 = document.getElementById('s2').innerText;
         window.open(`https://wa.me/?text=${encodeURI('FINALE: '+n1+' '+s1+' - '+s2+' '+n2)}`);
     }
+
+    document.addEventListener('visibilitychange', () => {
+        if (wakeLock !== null && document.visibilityState === 'visible' && r) { requestWakeLock(); }
+    });
 </script>
 </body>
 </html>
